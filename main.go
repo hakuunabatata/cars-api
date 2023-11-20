@@ -1,23 +1,35 @@
 package main
 
 import (
-	"fmt"
+	"github.com/labstack/echo/v4"
 )
 
-func main() {
-	a := 10
-	b := 20
-	result, err := sum(a, b)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(result)
+type Car struct {
+	Name  string
+	Price float64
 }
 
-func sum(a int, b int) (int, error) {
-	if a+b > 10 {
-		return 0, fmt.Errorf("sum > 10")
+var cars []Car
+
+func createCars(c echo.Context) error {
+	car := new(Car)
+	if err := c.Bind(car); err != nil {
+		return err
 	}
-	return a + b, nil
+
+	cars = append(cars, *car)
+
+	return c.JSON(200, cars)
+
+}
+
+func getCars(c echo.Context) error {
+	return c.JSON(200, cars)
+}
+
+func main() {
+	e := echo.New()
+	e.GET("/cars", getCars)
+	e.POST("/cars", createCars)
+	e.Start(":8080")
 }
